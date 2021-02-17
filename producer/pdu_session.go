@@ -698,7 +698,30 @@ func HandlePDUSessionSMContextUpdate(smContextRef string, body models.UpdateSmCo
 		logger.CtxLog.Traceln("SMContextState Change State: ", smContext.SMContextState.String())
 		logger.CtxLog.Infoln("[SMF] Cause_REL_DUE_TO_DUPLICATE_SESSION_ID")
 	}
+	// TODO figure out where this chunk of code should be placed
+	// Update Charging Data Record
+	trackChargingData := factory.SmfConfig.Configuration.TrackChargingData
+	if trackChargingData {
+		_, problemDetail := chf_util.UpdateChargingData()
 
+		if problemDetail != nil {
+			logger.PduSessLog.Warnf("Update Charging Data problem[%+v]", problemDetail)
+		}
+
+		// Todo handle update charging data response if needed
+	}
+
+	// TODO figure out where this chunk of code should be placed
+	// Release Charging Data Record
+	if trackChargingData {
+		_, problemDetail := chf_util.ReleaseChargingData()
+
+		if problemDetail != nil {
+			logger.PduSessLog.Warnf("Release Charging Data problem[%+v]", problemDetail)
+		}
+
+		// Todo handle Release charging data response if needed
+	}
 	var httpResponse *http_wrapper.Response
 	// Check FSM and take corresponding action
 	switch smContext.SMContextState {

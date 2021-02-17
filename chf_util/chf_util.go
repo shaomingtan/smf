@@ -138,3 +138,67 @@ func CreateInitialChargingData(smPlmnID *models.PlmnId, smContext *smf_context.S
 	}()
 	return &chargingDataResponse, nil
 }
+
+// Update Charging Data
+// TODO Figure out the correct attributes to pass into function
+func UpdateChargingData() (*models.ChargingDataResponse, error) {
+	// Get chf uri
+	uri := getCHFUri()
+
+	// Init CHF client
+	client := getNchfClient(uri)
+
+	// TODO: Set chargingDataRequest properly. Currently using null data or data that i'm unsure.
+	chargingDataRequest := models.ChargingDataRequest{}
+
+	// TODO: Figure out how to derive chargingDataRef from context
+	chargingDataRef := "some-generic-ref"
+
+	var response *http.Response
+	chargingDataResponse, response, err := client.DefaultApi.Update(context.Background(), chargingDataRequest, chargingDataRef)
+	logger.ExtensionLog.Infof("Update chargingDataResponse %+v", chargingDataResponse)
+
+	if err != nil || response == nil || response.StatusCode != http.StatusOK {
+		logger.ExtensionLog.Warnf("CHF update charging data request failed")
+		return nil, openapi.ReportError("CHF initial charging data request failed[%s]", err.Error())
+	}
+	defer func() {
+		if rspCloseErr := response.Body.Close(); rspCloseErr != nil {
+			logger.ExtensionLog.Errorf(
+				"ConvergedChargingUpdate response body cannot close: %+v", rspCloseErr)
+		}
+	}()
+	return &chargingDataResponse, nil
+}
+
+// Release Charging Data
+// TODO Figure out the correct attributes to pass into function
+func ReleaseChargingData() (*models.ChargingDataResponse, error) {
+	// Get chf uri
+	uri := getCHFUri()
+
+	// Init CHF client
+	client := getNchfClient(uri)
+
+	// TODO: Set chargingDataRequest properly. Currently using null data or data that i'm unsure.
+	chargingDataRequest := models.ChargingDataRequest{}
+
+	// TODO: Figure out how to derive chargingDataRef from context
+	chargingDataRef := "some-generic-ref"
+
+	var response *http.Response
+	chargingDataResponse, response, err := client.DefaultApi.Release(context.Background(), chargingDataRequest, chargingDataRef)
+	logger.ExtensionLog.Infof("Release chargingDataResponse %+v", chargingDataResponse)
+
+	if err != nil || response == nil || response.StatusCode != http.StatusOK {
+		logger.ExtensionLog.Warnf("CHF Release charging data request failed")
+		return nil, openapi.ReportError("CHF initial charging data request failed[%s]", err.Error())
+	}
+	defer func() {
+		if rspCloseErr := response.Body.Close(); rspCloseErr != nil {
+			logger.ExtensionLog.Errorf(
+				"ConvergedChargingRelease response body cannot close: %+v", rspCloseErr)
+		}
+	}()
+	return &chargingDataResponse, nil
+}
