@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"time"
 
 	smf_context "github.com/free5gc/smf/context"
 	"github.com/free5gc/smf/logger"
@@ -149,7 +150,10 @@ func UpdateChargingData() (*models.ChargingDataResponse, error) {
 	client := getNchfClient(uri)
 
 	// TODO: Set chargingDataRequest properly. Currently using null data or data that i'm unsure.
-	chargingDataRequest := models.ChargingDataRequest{}
+	curTime := time.Now().UTC()
+	chargingDataRequest := models.ChargingDataRequest{
+		InvocationTimeStamp: &curTime,
+	}
 
 	// TODO: Figure out how to derive chargingDataRef from context
 	chargingDataRef := "some-generic-ref"
@@ -181,7 +185,10 @@ func ReleaseChargingData() (*models.ChargingDataResponse, error) {
 	client := getNchfClient(uri)
 
 	// TODO: Set chargingDataRequest properly. Currently using null data or data that i'm unsure.
-	chargingDataRequest := models.ChargingDataRequest{}
+	curTime := time.Now().UTC()
+	chargingDataRequest := models.ChargingDataRequest{
+		InvocationTimeStamp: &curTime,
+	}
 
 	// TODO: Figure out how to derive chargingDataRef from context
 	chargingDataRef := "some-generic-ref"
@@ -190,7 +197,7 @@ func ReleaseChargingData() (*models.ChargingDataResponse, error) {
 	chargingDataResponse, response, err := client.DefaultApi.Release(context.Background(), chargingDataRequest, chargingDataRef)
 	logger.ExtensionLog.Infof("Release chargingDataResponse %+v", chargingDataResponse)
 
-	if err != nil || response == nil || response.StatusCode != http.StatusOK {
+	if err != nil || response == nil || response.StatusCode != http.StatusNoContent {
 		logger.ExtensionLog.Warnf("CHF Release charging data request failed")
 		return nil, openapi.ReportError("CHF initial charging data request failed[%s]", err.Error())
 	}
